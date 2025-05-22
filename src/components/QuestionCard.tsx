@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Eraser } from 'lucide-react';
 
 interface Question {
   id: number;
@@ -31,6 +31,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
     setTimeout(() => {
       onAnswer(answerIndex);
     }, 1000);
+  };
+
+  const handleClearSelection = () => {
+    if (showResult) return; // Don't allow clearing after submission
+    setSelectedAnswer(null);
   };
 
   const getButtonStyle = (index: number) => {
@@ -96,7 +101,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
           ))}
         </div>
 
-        {showResult && question.explanation && (
+        <div className="flex justify-between">
+          <Button 
+            variant="ghost" 
+            onClick={handleClearSelection} 
+            disabled={selectedAnswer === null || showResult}
+            className="flex items-center gap-2"
+          >
+            <Eraser size={16} />
+            Clear Selection
+          </Button>
+        </div>
+
+        {showResult && selectedAnswer !== null && selectedAnswer !== question.correctAnswer && question.explanation && (
           <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-fade-in">
             <p className="text-sm text-blue-800">
               <strong>Explanation:</strong> {question.explanation}
