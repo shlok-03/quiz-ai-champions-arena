@@ -2,13 +2,24 @@
 import { Question } from '@/types/quiz';
 import { toast } from 'sonner';
 
+// Store API key in localStorage to persist between sessions
+const getApiKey = () => localStorage.getItem('openai_api_key');
+const setApiKey = (key: string) => localStorage.setItem('openai_api_key', key);
+
 export async function generateQuestions(topic: string, questionCount: number): Promise<Question[]> {
   try {
+    const apiKey = getApiKey();
+    
+    if (!apiKey) {
+      throw new Error("API key not set");
+    }
+
     // Attempt to generate questions with OpenAI
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
@@ -63,6 +74,17 @@ export async function generateQuestions(topic: string, questionCount: number): P
     toast.error('Using sample questions - AI service unavailable', { duration: 3000 });
     return sampleQuestions;
   }
+}
+
+// Add a function to check if API key is set
+export function isApiKeySet(): boolean {
+  return !!getApiKey();
+}
+
+// Add a function to set API key
+export function setOpenAIApiKey(key: string): void {
+  setApiKey(key);
+  toast.success('API key saved successfully');
 }
 
 function getSampleQuestions(topic: string, questionCount: number): Question[] {
