@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import QuestionCard from './QuestionCard';
 import TrophyDisplay from './TrophyDisplay';
-import { Trophy, Star, Brain, Zap } from 'lucide-react';
+import { Trophy, Star, Brain, Zap, Heart } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface Question {
   id: number;
@@ -27,6 +28,9 @@ interface QuizState {
   gamePhase: 'setup' | 'loading' | 'playing' | 'finished';
   playerName: string;
   answers: number[];
+  lives: number;
+  showExplanationModal: boolean;
+  currentExplanation: string;
 }
 
 const QuizGame = () => {
@@ -39,7 +43,10 @@ const QuizGame = () => {
     credits: 0,
     gamePhase: 'setup',
     playerName: '',
-    answers: []
+    answers: [],
+    lives: 3,
+    showExplanationModal: false,
+    currentExplanation: ''
   });
 
   const generateQuestions = async () => {
@@ -50,84 +57,155 @@ const QuizGame = () => {
 
     setQuiz(prev => ({ ...prev, gamePhase: 'loading' }));
     
-    // Simulate AI generation with sample questions
-    const sampleQuestions: Question[] = [
-      {
-        id: 1,
-        question: `What is a key characteristic of ${quiz.topic}?`,
-        options: ['Option A', 'Option B', 'Option C', 'Option D'],
-        correctAnswer: 0,
-        explanation: 'This is the correct answer because...'
-      },
-      {
-        id: 2,
-        question: `Which of these is most related to ${quiz.topic}?`,
-        options: ['Choice 1', 'Choice 2', 'Choice 3', 'Choice 4'],
-        correctAnswer: 1
-      },
-      {
-        id: 3,
-        question: `What best describes ${quiz.topic}?`,
-        options: ['Description A', 'Description B', 'Description C', 'Description D'],
-        correctAnswer: 2
-      },
-      {
-        id: 4,
-        question: `In the context of ${quiz.topic}, which is true?`,
-        options: ['Statement 1', 'Statement 2', 'Statement 3', 'Statement 4'],
-        correctAnswer: 0
-      },
-      {
-        id: 5,
-        question: `What is an important aspect of ${quiz.topic}?`,
-        options: ['Aspect A', 'Aspect B', 'Aspect C', 'Aspect D'],
-        correctAnswer: 3
-      },
-      {
-        id: 6,
-        question: `How does ${quiz.topic} relate to modern society?`,
-        options: ['Relationship 1', 'Relationship 2', 'Relationship 3', 'Relationship 4'],
-        correctAnswer: 1
-      },
-      {
-        id: 7,
-        question: `What is a common misconception about ${quiz.topic}?`,
-        options: ['Misconception A', 'Misconception B', 'Misconception C', 'Misconception D'],
-        correctAnswer: 2
-      },
-      {
-        id: 8,
-        question: `Which factor most influences ${quiz.topic}?`,
-        options: ['Factor 1', 'Factor 2', 'Factor 3', 'Factor 4'],
-        correctAnswer: 0
-      },
-      {
-        id: 9,
-        question: `What is the primary purpose of ${quiz.topic}?`,
-        options: ['Purpose A', 'Purpose B', 'Purpose C', 'Purpose D'],
-        correctAnswer: 3
-      },
-      {
-        id: 10,
-        question: `How has ${quiz.topic} evolved over time?`,
-        options: ['Evolution 1', 'Evolution 2', 'Evolution 3', 'Evolution 4'],
-        correctAnswer: 1
+    try {
+      // Attempt to generate questions with OpenAI
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "You are a quiz generator. Create multiple choice questions based on the topic provided."
+            },
+            {
+              role: "user",
+              content: `Generate ${quiz.questionCount} multiple choice questions about "${quiz.topic}". 
+                Format the response as a JSON array with each question having: 
+                id (number), question (string), 
+                options (array of 4 strings), 
+                correctAnswer (index number 0-3 indicating which option is correct), 
+                explanation (string explaining why the answer is correct)`
+            }
+          ],
+          response_format: { type: "json_object" }
+        })
+      }).catch(error => {
+        console.error("Error fetching from OpenAI:", error);
+        throw new Error("Failed to connect to AI service");
+      });
+
+      if (!response || !response.ok) {
+        throw new Error("Failed to generate questions");
       }
-    ];
 
-    // Simulate loading time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+      const data = await response.json();
+      let generatedQuestions: Question[] = [];
+      
+      try {
+        // Try to parse the AI response
+        generatedQuestions = JSON.parse(data.choices[0].message.content).questions;
+      } catch (e) {
+        console.error("Error parsing AI response:", e);
+        throw new Error("Invalid response from AI service");
+      }
 
-    const selectedQuestions = sampleQuestions.slice(0, quiz.questionCount);
-    
-    setQuiz(prev => ({
-      ...prev,
-      questions: selectedQuestions,
-      gamePhase: 'playing',
-      answers: new Array(quiz.questionCount).fill(-1)
-    }));
+      if (!generatedQuestions || generatedQuestions.length === 0) {
+        throw new Error("No questions generated");
+      }
 
-    toast.success(`Generated ${quiz.questionCount} questions about ${quiz.topic}!`);
+      setQuiz(prev => ({
+        ...prev,
+        questions: generatedQuestions,
+        gamePhase: 'playing',
+        answers: new Array(quiz.questionCount).fill(-1),
+        lives: 3
+      }));
+
+      toast.success(`Generated ${quiz.questionCount} questions about ${quiz.topic}!`);
+    } catch (error) {
+      console.error("Error generating questions:", error);
+      
+      // Fallback to sample questions if API fails
+      const sampleQuestions: Question[] = [
+        {
+          id: 1,
+          question: `What is a key characteristic of ${quiz.topic}?`,
+          options: ['Option A', 'Option B', 'Option C', 'Option D'],
+          correctAnswer: 0,
+          explanation: 'This is the correct answer because it represents the fundamental aspect of the topic.'
+        },
+        {
+          id: 2,
+          question: `Which of these is most related to ${quiz.topic}?`,
+          options: ['Choice 1', 'Choice 2', 'Choice 3', 'Choice 4'],
+          correctAnswer: 1,
+          explanation: 'This choice has the strongest historical and conceptual connection to the topic.'
+        },
+        {
+          id: 3,
+          question: `What best describes ${quiz.topic}?`,
+          options: ['Description A', 'Description B', 'Description C', 'Description D'],
+          correctAnswer: 2,
+          explanation: 'This description captures the essential nature of the topic most accurately.'
+        },
+        {
+          id: 4,
+          question: `In the context of ${quiz.topic}, which is true?`,
+          options: ['Statement 1', 'Statement 2', 'Statement 3', 'Statement 4'],
+          correctAnswer: 0,
+          explanation: 'This statement aligns with the established facts about the topic.'
+        },
+        {
+          id: 5,
+          question: `What is an important aspect of ${quiz.topic}?`,
+          options: ['Aspect A', 'Aspect B', 'Aspect C', 'Aspect D'],
+          correctAnswer: 3,
+          explanation: 'This aspect is crucial to understanding the full scope of the topic.'
+        },
+        {
+          id: 6,
+          question: `How does ${quiz.topic} relate to modern society?`,
+          options: ['Relationship 1', 'Relationship 2', 'Relationship 3', 'Relationship 4'],
+          correctAnswer: 1,
+          explanation: 'This relationship illustrates how the topic influences contemporary life.'
+        },
+        {
+          id: 7,
+          question: `What is a common misconception about ${quiz.topic}?`,
+          options: ['Misconception A', 'Misconception B', 'Misconception C', 'Misconception D'],
+          correctAnswer: 2,
+          explanation: 'This is a widely held but incorrect belief about the topic.'
+        },
+        {
+          id: 8,
+          question: `Which factor most influences ${quiz.topic}?`,
+          options: ['Factor 1', 'Factor 2', 'Factor 3', 'Factor 4'],
+          correctAnswer: 0,
+          explanation: 'This factor has been shown to have the greatest impact on the development of the topic.'
+        },
+        {
+          id: 9,
+          question: `What is the primary purpose of ${quiz.topic}?`,
+          options: ['Purpose A', 'Purpose B', 'Purpose C', 'Purpose D'],
+          correctAnswer: 3,
+          explanation: 'This purpose represents the main reason for the existence or development of the topic.'
+        },
+        {
+          id: 10,
+          question: `How has ${quiz.topic} evolved over time?`,
+          options: ['Evolution 1', 'Evolution 2', 'Evolution 3', 'Evolution 4'],
+          correctAnswer: 1,
+          explanation: 'This evolutionary path most accurately represents the historical development of the topic.'
+        }
+      ];
+
+      const selectedQuestions = sampleQuestions.slice(0, quiz.questionCount);
+      
+      setQuiz(prev => ({
+        ...prev,
+        questions: selectedQuestions,
+        gamePhase: 'playing',
+        answers: new Array(quiz.questionCount).fill(-1),
+        lives: 3
+      }));
+
+      toast.success(`Generated ${quiz.questionCount} questions about ${quiz.topic}!`);
+      toast.error('Using sample questions - AI service unavailable', { duration: 3000 });
+    }
   };
 
   const handleAnswer = (answerIndex: number) => {
@@ -139,21 +217,42 @@ const QuizGame = () => {
     
     const newScore = isCorrect ? quiz.score + 1 : quiz.score;
     const newCredits = isCorrect ? quiz.credits + 10 : quiz.credits;
+    const newLives = isCorrect ? quiz.lives : quiz.lives - 1;
+    
+    // Show explanation for wrong answers
+    if (!isCorrect && currentQ.explanation) {
+      setQuiz(prev => ({
+        ...prev,
+        showExplanationModal: true,
+        currentExplanation: currentQ.explanation || "No explanation available."
+      }));
+    }
 
     if (isCorrect) {
       toast.success('Correct! +10 credits', {
         icon: <Star className="text-yellow-500" />
       });
     } else {
-      toast.error('Incorrect answer');
+      toast.error(`Incorrect answer. ${newLives} ${newLives === 1 ? 'life' : 'lives'} remaining.`, {
+        icon: <Heart className="text-red-500" />
+      });
     }
 
     setQuiz(prev => ({
       ...prev,
       score: newScore,
       credits: newCredits,
-      answers: newAnswers
+      answers: newAnswers,
+      lives: newLives
     }));
+
+    // Check for game over
+    if (newLives <= 0) {
+      setTimeout(() => {
+        setQuiz(prev => ({ ...prev, gamePhase: 'finished' }));
+      }, 1500);
+      return;
+    }
 
     // Move to next question or finish
     setTimeout(() => {
@@ -175,8 +274,18 @@ const QuizGame = () => {
       credits: 0,
       gamePhase: 'setup',
       playerName: '',
-      answers: []
+      answers: [],
+      lives: 3,
+      showExplanationModal: false,
+      currentExplanation: ''
     });
+  };
+
+  const closeExplanationModal = () => {
+    setQuiz(prev => ({
+      ...prev,
+      showExplanationModal: false
+    }));
   };
 
   if (quiz.gamePhase === 'setup') {
@@ -227,6 +336,16 @@ const QuizGame = () => {
               </Select>
             </div>
 
+            <div className="text-center text-gray-700 py-2">
+              <div className="flex items-center justify-center space-x-1">
+                <Heart className="h-5 w-5 text-red-500" fill="red" />
+                <Heart className="h-5 w-5 text-red-500" fill="red" />
+                <Heart className="h-5 w-5 text-red-500" fill="red" />
+                <span className="ml-2 font-medium">3 lives</span>
+              </div>
+              <p className="text-sm mt-1">You lose a life for each wrong answer!</p>
+            </div>
+
             <Button 
               onClick={generateQuestions}
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3"
@@ -271,6 +390,15 @@ const QuizGame = () => {
                   <Star className="h-5 w-5 text-yellow-400" />
                   <span className="font-semibold">{quiz.credits} Credits</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Heart 
+                      key={i}
+                      className={`h-5 w-5 ${i < quiz.lives ? 'text-red-500' : 'text-gray-400'}`}
+                      fill={i < quiz.lives ? 'red' : 'none'}
+                    />
+                  ))}
+                </div>
                 <div className="text-sm">
                   Score: {quiz.score}/{quiz.questions.length}
                 </div>
@@ -291,6 +419,21 @@ const QuizGame = () => {
             onAnswer={handleAnswer}
             questionNumber={quiz.currentQuestion + 1}
           />
+
+          {/* Explanation Dialog */}
+          <Dialog open={quiz.showExplanationModal} onOpenChange={closeExplanationModal}>
+            <DialogContent className="bg-white">
+              <DialogHeader>
+                <DialogTitle>Explanation</DialogTitle>
+                <DialogDescription>
+                  {quiz.currentExplanation}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end">
+                <Button onClick={closeExplanationModal}>Got it</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     );
@@ -298,6 +441,7 @@ const QuizGame = () => {
 
   if (quiz.gamePhase === 'finished') {
     const isPerfectScore = quiz.score === quiz.questions.length;
+    const isGameOver = quiz.lives <= 0;
     
     return (
       <TrophyDisplay
@@ -308,6 +452,8 @@ const QuizGame = () => {
         topic={quiz.topic}
         isPerfectScore={isPerfectScore}
         onPlayAgain={resetQuiz}
+        isGameOver={isGameOver}
+        lives={quiz.lives}
       />
     );
   }
