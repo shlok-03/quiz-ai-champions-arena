@@ -32,6 +32,8 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   currentExplanation,
   onAnswer,
   closeExplanationModal,
+  onPrevious,
+  onNext,
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4">
