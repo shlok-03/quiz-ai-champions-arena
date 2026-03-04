@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Eraser } from 'lucide-react';
+import { CheckCircle, XCircle, Eraser, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Question } from '@/types/quiz';
 
 interface QuestionCardProps {
