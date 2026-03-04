@@ -152,6 +152,8 @@ const QuizGame = () => {
           currentExplanation={quiz.currentExplanation}
           onAnswer={handleAnswer}
           closeExplanationModal={() => setQuiz(prev => ({ ...prev, showExplanationModal: false }))}
+          onPrevious={() => setQuiz(prev => ({ ...prev, currentQuestion: Math.max(0, prev.currentQuestion - 1) }))}
+          onNext={() => setQuiz(prev => ({ ...prev, currentQuestion: Math.min(prev.questions.length - 1, prev.currentQuestion + 1) }))}
         />
       );
     case 'finished': {
