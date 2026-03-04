@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Eraser } from 'lucide-react';
+import { CheckCircle, XCircle, Eraser, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Question } from '@/types/quiz';
 
 interface QuestionCardProps {
   question: Question;
   onAnswer: (answerIndex: number) => void;
   questionNumber: number;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber, onPrevious, onNext, hasPrevious, hasNext }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
@@ -93,7 +97,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
           ))}
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="outline" 
+            onClick={onPrevious} 
+            disabled={!hasPrevious}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
           <Button 
             variant="ghost" 
             onClick={handleClearSelection} 
@@ -101,7 +114,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
             className="flex items-center gap-2"
           >
             <Eraser size={16} />
-            Clear Selection
+            Clear
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={onNext} 
+            disabled={!hasNext}
+            className="flex items-center gap-2"
+          >
+            Next
+            <ChevronRight size={16} />
           </Button>
         </div>
 

@@ -17,6 +17,8 @@ interface PlayingScreenProps {
   currentExplanation: string;
   onAnswer: (answerIndex: number) => void;
   closeExplanationModal: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }
 
 const PlayingScreen: React.FC<PlayingScreenProps> = ({
@@ -30,6 +32,8 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   currentExplanation,
   onAnswer,
   closeExplanationModal,
+  onPrevious,
+  onNext,
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4">
@@ -74,6 +78,10 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
           question={questions[currentQuestion]}
           onAnswer={onAnswer}
           questionNumber={currentQuestion + 1}
+          onPrevious={onPrevious}
+          onNext={onNext}
+          hasPrevious={currentQuestion > 0}
+          hasNext={currentQuestion < questions.length - 1}
         />
 
         {/* Explanation Dialog */}
