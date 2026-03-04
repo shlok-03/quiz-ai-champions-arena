@@ -78,6 +78,10 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
           question={questions[currentQuestion]}
           onAnswer={onAnswer}
           questionNumber={currentQuestion + 1}
+          onPrevious={onPrevious}
+          onNext={onNext}
+          hasPrevious={currentQuestion > 0}
+          hasNext={currentQuestion < questions.length - 1}
         />
 
         {/* Explanation Dialog */}
