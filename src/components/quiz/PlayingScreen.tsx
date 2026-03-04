@@ -17,6 +17,8 @@ interface PlayingScreenProps {
   currentExplanation: string;
   onAnswer: (answerIndex: number) => void;
   closeExplanationModal: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
 }
 
 const PlayingScreen: React.FC<PlayingScreenProps> = ({
