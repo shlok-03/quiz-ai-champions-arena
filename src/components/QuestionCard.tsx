@@ -14,7 +14,7 @@ interface QuestionCardProps {
   hasNext: boolean;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber, onPrevious, onNext, hasPrevious, hasNext }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
