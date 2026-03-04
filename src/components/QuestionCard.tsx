@@ -8,6 +8,10 @@ interface QuestionCardProps {
   question: Question;
   onAnswer: (answerIndex: number) => void;
   questionNumber: number;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber }) => {
