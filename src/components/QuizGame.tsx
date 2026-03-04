@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Star, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 import SetupScreen from './quiz/SetupScreen';
 import LoadingScreen from './quiz/LoadingScreen';
 import PlayingScreen from './quiz/PlayingScreen';
 import TrophyDisplay from './TrophyDisplay';
-import { generateQuestions, isApiKeySet, setOpenAIApiKey } from '@/services/QuizService';
+import { generateQuestions } from '@/services/QuizService';
 import { QuizState } from '@/types/quiz';
 
 const QuizGame = () => {
-  const [showApiKeyForm, setShowApiKeyForm] = useState(!isApiKeySet());
-  const [apiKey, setApiKey] = useState('');
   const [quiz, setQuiz] = useState<QuizState>({
     topic: '',
     questionCount: 5,
@@ -30,29 +25,9 @@ const QuizGame = () => {
     currentExplanation: ''
   });
 
-  // Check if API key is set on component mount
-  useEffect(() => {
-    setShowApiKeyForm(!isApiKeySet());
-  }, []);
-
-  const handleApiKeySave = () => {
-    if (!apiKey.trim()) {
-      toast.error('Please enter a valid API key');
-      return;
-    }
-
-    setOpenAIApiKey(apiKey);
-    setShowApiKeyForm(false);
-  };
-
   const handleStartQuiz = async () => {
     if (!quiz.topic.trim() || !quiz.playerName.trim()) {
       toast.error('Please enter both your name and a topic!');
-      return;
-    }
-
-    if (!isApiKeySet()) {
-      setShowApiKeyForm(true);
       return;
     }
 
@@ -85,7 +60,6 @@ const QuizGame = () => {
     const newCredits = isCorrect ? quiz.credits + 10 : quiz.credits;
     const newLives = isCorrect ? quiz.lives : quiz.lives - 1;
     
-    // Show explanation for wrong answers
     if (!isCorrect && currentQ.explanation) {
       setQuiz(prev => ({
         ...prev,
@@ -112,7 +86,6 @@ const QuizGame = () => {
       lives: newLives
     }));
 
-    // Check for game over
     if (newLives <= 0) {
       setTimeout(() => {
         setQuiz(prev => ({ ...prev, gamePhase: 'finished' }));
@@ -120,7 +93,6 @@ const QuizGame = () => {
       return;
     }
 
-    // Move to next question or finish
     setTimeout(() => {
       if (quiz.currentQuestion + 1 < quiz.questions.length) {
         setQuiz(prev => ({ ...prev, currentQuestion: prev.currentQuestion + 1 }));
@@ -146,61 +118,6 @@ const QuizGame = () => {
       currentExplanation: ''
     });
   };
-
-  const closeExplanationModal = () => {
-    setQuiz(prev => ({
-      ...prev,
-      showExplanationModal: false
-    }));
-  };
-
-  const setPlayerName = (name: string) => {
-    setQuiz(prev => ({ ...prev, playerName: name }));
-  };
-
-  const setTopic = (topic: string) => {
-    setQuiz(prev => ({ ...prev, topic }));
-  };
-
-  const setQuestionCount = (count: number) => {
-    setQuiz(prev => ({ ...prev, questionCount: count }));
-  };
-
-  if (showApiKeyForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">OpenAI API Key Required</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4 text-sm text-gray-600">
-              To generate quiz questions, please enter your OpenAI API key. 
-              Your key will be stored locally in your browser.
-            </p>
-            <Input
-              type="password"
-              placeholder="sk-..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="mb-2"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              You can get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">OpenAI's website</a>
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowApiKeyForm(false)}>
-              Use Sample Questions
-            </Button>
-            <Button onClick={handleApiKeySave}>
-              Save API Key
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
 
   switch (quiz.gamePhase) {
     case 'setup':
