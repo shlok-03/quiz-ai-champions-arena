@@ -97,7 +97,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
           ))}
         </div>
 
-        <div className="flex justify-between">
+        <div className="flex justify-between items-center">
+          <Button 
+            variant="outline" 
+            onClick={onPrevious} 
+            disabled={!hasPrevious}
+            className="flex items-center gap-2"
+          >
+            <ChevronLeft size={16} />
+            Previous
+          </Button>
           <Button 
             variant="ghost" 
             onClick={handleClearSelection} 
@@ -105,7 +114,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
             className="flex items-center gap-2"
           >
             <Eraser size={16} />
-            Clear Selection
+            Clear
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={onNext} 
+            disabled={!hasNext}
+            className="flex items-center gap-2"
+          >
+            Next
+            <ChevronRight size={16} />
           </Button>
         </div>
 
