@@ -18,6 +18,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
+  // Reset state when question changes (navigation)
+  React.useEffect(() => {
+    setSelectedAnswer(null);
+    setShowResult(false);
+  }, [question.id]);
+
   const handleAnswerClick = (answerIndex: number) => {
     if (showResult) return;
     
