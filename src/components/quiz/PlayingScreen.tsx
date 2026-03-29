@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Star, Heart } from 'lucide-react';
+import { Star, Heart, Lightbulb } from 'lucide-react';
 import QuestionCard from '../QuestionCard';
 import { Question } from '@/types/quiz';
 
@@ -35,43 +34,52 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   onPrevious,
   onNext,
 }) => {
+  const progress = ((currentQuestion + 1) / questions.length) * 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background bg-grid-pattern relative overflow-hidden p-4">
+      {/* Ambient glow */}
+      <div className="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-primary/8 blur-[120px]" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-accent/8 blur-[100px]" />
+
+      <div className="max-w-3xl mx-auto relative z-10">
         {/* Progress Header */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-6 flex justify-between items-center text-white">
-          <div>
-            <h2 className="text-xl font-bold">{topic} Quiz</h2>
-            <p className="text-white/80">Question {currentQuestion + 1} of {questions.length}</p>
-          </div>
-          <div className="text-right">
+        <div className="glass-strong rounded-2xl p-4 mb-5 animate-fade-in">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-bold font-display text-gradient">{topic} Quiz</h2>
+              <p className="text-sm text-muted-foreground">Question {currentQuestion + 1} of {questions.length}</p>
+            </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <Star className="h-5 w-5 text-yellow-400" />
-                <span className="font-semibold">{credits} Credits</span>
+              <div className="flex items-center gap-1.5 bg-muted/50 rounded-lg px-3 py-1.5">
+                <Star className="h-4 w-4 text-warning" />
+                <span className="text-sm font-semibold text-foreground">{credits}</span>
               </div>
               <div className="flex items-center gap-1">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Heart 
                     key={i}
-                    className={`h-5 w-5 ${i < lives ? 'text-red-500' : 'text-gray-400'}`}
-                    fill={i < lives ? 'red' : 'none'}
+                    className={`h-4 w-4 transition-all duration-300 ${i < lives ? 'text-destructive scale-100' : 'text-muted-foreground/30 scale-75'}`}
+                    fill={i < lives ? 'hsl(var(--destructive))' : 'none'}
                   />
                 ))}
               </div>
-              <div className="text-sm">
-                Score: {score}/{questions.length}
+              <div className="text-sm font-medium text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5">
+                {score}/{questions.length}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Progress Bar */}
-        <div className="bg-white/20 rounded-full h-2 mb-6">
-          <div 
-            className="bg-gradient-to-r from-yellow-400 to-green-400 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
-          ></div>
+          {/* Progress Bar */}
+          <div className="mt-3 bg-muted/50 rounded-full h-1.5 overflow-hidden">
+            <div 
+              className="h-full rounded-full transition-all duration-700 ease-out"
+              style={{ 
+                width: `${progress}%`,
+                background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))'
+              }}
+            />
+          </div>
         </div>
 
         <QuestionCard
@@ -86,15 +94,20 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
 
         {/* Explanation Dialog */}
         <Dialog open={showExplanationModal} onOpenChange={closeExplanationModal}>
-          <DialogContent className="bg-white">
+          <DialogContent className="glass-strong border-border">
             <DialogHeader>
-              <DialogTitle>Explanation</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="flex items-center gap-2 font-display text-foreground">
+                <Lightbulb className="h-5 w-5 text-warning" />
+                Explanation
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground text-base leading-relaxed mt-2">
                 {currentExplanation}
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-end">
-              <Button onClick={closeExplanationModal}>Got it</Button>
+              <Button onClick={closeExplanationModal} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Got it
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
