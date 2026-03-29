@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Brain, Zap, Heart } from 'lucide-react';
+import { Difficulty } from '@/types/quiz';
 
 interface SetupScreenProps {
   playerName: string;
@@ -13,6 +13,8 @@ interface SetupScreenProps {
   setTopic: (topic: string) => void;
   questionCount: number;
   setQuestionCount: (count: number) => void;
+  difficulty: Difficulty;
+  setDifficulty: (d: Difficulty) => void;
   onStart: () => void;
 }
 
@@ -23,6 +25,8 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
   setTopic,
   questionCount,
   setQuestionCount,
+  difficulty,
+  setDifficulty,
   onStart,
 }) => {
   return (
@@ -68,6 +72,20 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
               <SelectContent>
                 <SelectItem value="5">5 Questions</SelectItem>
                 <SelectItem value="10">10 Questions</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Difficulty Level</label>
+            <Select value={difficulty} onValueChange={(v) => setDifficulty(v as Difficulty)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="easy">🟢 Easy</SelectItem>
+                <SelectItem value="medium">🟡 Medium</SelectItem>
+                <SelectItem value="hard">🔴 Hard</SelectItem>
               </SelectContent>
             </Select>
           </div>

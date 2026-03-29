@@ -12,7 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    const { topic, questionCount } = await req.json();
+    const { topic, questionCount, difficulty = 'medium' } = await req.json();
+    const difficultyGuide = {
+      easy: 'Create simple, straightforward questions suitable for beginners. Use basic facts and common knowledge.',
+      medium: 'Create moderately challenging questions that require some knowledge of the topic.',
+      hard: 'Create very challenging questions that require deep expertise. Include tricky options and nuanced details.',
+    }[difficulty] || '';
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -29,7 +34,7 @@ serve(async (req) => {
           messages: [
             {
               role: "system",
-              content: `You are a quiz generator. Create exactly ${questionCount} multiple-choice questions about the given topic. Each question must have exactly 4 options. Return ONLY a JSON object with a "questions" key containing an array of question objects.`,
+              content: `You are a quiz generator. Create exactly ${questionCount} multiple-choice questions about the given topic at ${difficulty} difficulty level. ${difficultyGuide} Each question must have exactly 4 options. Return ONLY a JSON object with a "questions" key containing an array of question objects.`,
             },
             {
               role: "user",

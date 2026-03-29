@@ -1,3 +1,4 @@
+export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface Question {
   id: number;
@@ -10,6 +11,7 @@ export interface Question {
 export interface QuizState {
   topic: string;
   questionCount: number;
+  difficulty: Difficulty;
   questions: Question[];
   currentQuestion: number;
   score: number;
