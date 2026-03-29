@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Eraser, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Question } from '@/types/quiz';
@@ -14,11 +13,12 @@ interface QuestionCardProps {
   hasNext: boolean;
 }
 
+const optionLabels = ['A', 'B', 'C', 'D'];
+
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber, onPrevious, onNext, hasPrevious, hasNext }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
-  // Reset state when question changes (navigation)
   React.useEffect(() => {
     setSelectedAnswer(null);
     setShowResult(false);
@@ -26,122 +26,117 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
 
   const handleAnswerClick = (answerIndex: number) => {
     if (showResult) return;
-    
     setSelectedAnswer(answerIndex);
     setShowResult(true);
-    
     setTimeout(() => {
       onAnswer(answerIndex);
-    }, 1000);
+    }, 1200);
   };
 
   const handleClearSelection = () => {
-    if (showResult) return; // Don't allow clearing after submission
+    if (showResult) return;
     setSelectedAnswer(null);
   };
 
   const getButtonStyle = (index: number) => {
     if (!showResult) {
       return selectedAnswer === index
-        ? 'bg-blue-500 text-white border-blue-500'
-        : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-200';
+        ? 'bg-primary/15 border-primary/50 text-foreground ring-1 ring-primary/30'
+        : 'bg-muted/30 border-border/30 text-foreground hover:bg-muted/60 hover:border-border/60';
     }
-
     if (index === question.correctAnswer) {
-      return 'bg-green-500 text-white border-green-500';
+      return 'bg-success/15 border-success/50 text-foreground glow-success';
     }
-
     if (selectedAnswer === index && index !== question.correctAnswer) {
-      return 'bg-red-500 text-white border-red-500';
+      return 'bg-destructive/15 border-destructive/50 text-foreground glow-destructive';
     }
-
-    return 'bg-gray-100 text-gray-500 border-gray-200';
+    return 'bg-muted/20 border-border/20 text-muted-foreground';
   };
 
   const getIcon = (index: number) => {
     if (!showResult) return null;
-    
     if (index === question.correctAnswer) {
-      return <CheckCircle className="h-5 w-5 ml-2" />;
+      return <CheckCircle className="h-5 w-5 text-success shrink-0" />;
     }
-    
     if (selectedAnswer === index && index !== question.correctAnswer) {
-      return <XCircle className="h-5 w-5 ml-2" />;
+      return <XCircle className="h-5 w-5 text-destructive shrink-0" />;
     }
-    
     return null;
   };
 
   return (
-    <Card className="w-full bg-white shadow-xl animate-fade-in">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-800">
-            Question {questionNumber}
-          </CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <h3 className="text-xl font-medium text-gray-900 leading-relaxed">
+    <div className="glass-strong rounded-2xl p-6 animate-fade-in-up">
+      {/* Question */}
+      <div className="mb-6">
+        <span className="text-xs font-semibold text-primary uppercase tracking-wider">Question {questionNumber}</span>
+        <h3 className="text-xl font-display font-semibold text-foreground mt-2 leading-relaxed">
           {question.question}
         </h3>
-        
-        <div className="grid gap-3">
-          {question.options.map((option, index) => (
-            <Button
-              key={index}
-              variant="outline"
-              className={`p-4 h-auto text-left justify-start transition-all duration-300 ${getButtonStyle(index)}`}
-              onClick={() => handleAnswerClick(index)}
-              disabled={showResult}
-            >
-              <div className="flex items-center justify-between w-full">
-                <span className="flex-1">{option}</span>
-                {getIcon(index)}
-              </div>
-            </Button>
-          ))}
-        </div>
+      </div>
+      
+      {/* Options */}
+      <div className="grid gap-3 mb-6">
+        {question.options.map((option, index) => (
+          <button
+            key={index}
+            className={`w-full p-4 rounded-xl text-left transition-all duration-300 border flex items-center gap-3 ${getButtonStyle(index)} ${showResult ? '' : 'active:scale-[0.98]'}`}
+            onClick={() => handleAnswerClick(index)}
+            disabled={showResult}
+          >
+            <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
+              selectedAnswer === index && !showResult ? 'bg-primary text-primary-foreground' :
+              showResult && index === question.correctAnswer ? 'bg-success text-success-foreground' :
+              showResult && selectedAnswer === index ? 'bg-destructive text-destructive-foreground' :
+              'bg-muted/50 text-muted-foreground'
+            }`}>
+              {optionLabels[index]}
+            </span>
+            <span className="flex-1 text-sm font-medium">{option}</span>
+            {getIcon(index)}
+          </button>
+        ))}
+      </div>
 
-        <div className="flex justify-between items-center">
-          <Button 
-            variant="outline" 
-            onClick={onPrevious} 
-            disabled={!hasPrevious}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft size={16} />
-            Previous
-          </Button>
-          <Button 
-            variant="ghost" 
-            onClick={handleClearSelection} 
-            disabled={selectedAnswer === null || showResult}
-            className="flex items-center gap-2"
-          >
-            <Eraser size={16} />
-            Clear
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={onNext} 
-            disabled={!hasNext}
-            className="flex items-center gap-2"
-          >
-            Next
-            <ChevronRight size={16} />
-          </Button>
-        </div>
+      {/* Navigation */}
+      <div className="flex justify-between items-center">
+        <Button 
+          variant="ghost" 
+          onClick={onPrevious} 
+          disabled={!hasPrevious}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft size={16} className="mr-1" />
+          Previous
+        </Button>
+        <Button 
+          variant="ghost" 
+          onClick={handleClearSelection} 
+          disabled={selectedAnswer === null || showResult}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Eraser size={16} className="mr-1" />
+          Clear
+        </Button>
+        <Button 
+          variant="ghost" 
+          onClick={onNext} 
+          disabled={!hasNext}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Next
+          <ChevronRight size={16} className="ml-1" />
+        </Button>
+      </div>
 
-        {showResult && selectedAnswer !== null && selectedAnswer !== question.correctAnswer && question.explanation && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-fade-in">
-            <p className="text-sm text-blue-800">
-              <strong>Explanation:</strong> {question.explanation}
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {/* Inline explanation */}
+      {showResult && selectedAnswer !== null && selectedAnswer !== question.correctAnswer && question.explanation && (
+        <div className="mt-5 p-4 rounded-xl bg-secondary/10 border border-secondary/20 animate-fade-in">
+          <p className="text-sm text-foreground/80">
+            <strong className="text-secondary">Explanation:</strong> {question.explanation}
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 
