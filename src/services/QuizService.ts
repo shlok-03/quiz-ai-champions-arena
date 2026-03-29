@@ -1,11 +1,11 @@
-import { Question } from '@/types/quiz';
+import { Question, Difficulty } from '@/types/quiz';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
-export async function generateQuestions(topic: string, questionCount: number): Promise<Question[]> {
+export async function generateQuestions(topic: string, questionCount: number, difficulty: Difficulty = 'medium'): Promise<Question[]> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-quiz', {
-      body: { topic, questionCount },
+      body: { topic, questionCount, difficulty },
     });
 
     if (error) {

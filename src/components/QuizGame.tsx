@@ -13,6 +13,7 @@ const QuizGame = () => {
   const [quiz, setQuiz] = useState<QuizState>({
     topic: '',
     questionCount: 5,
+    difficulty: 'medium',
     questions: [],
     currentQuestion: 0,
     score: 0,
@@ -34,7 +35,7 @@ const QuizGame = () => {
     setQuiz(prev => ({ ...prev, gamePhase: 'loading' }));
     
     try {
-      const questions = await generateQuestions(quiz.topic, quiz.questionCount);
+      const questions = await generateQuestions(quiz.topic, quiz.questionCount, quiz.difficulty);
       
       setQuiz(prev => ({
         ...prev,
@@ -106,6 +107,7 @@ const QuizGame = () => {
     setQuiz({
       topic: '',
       questionCount: 5,
+      difficulty: 'medium',
       questions: [],
       currentQuestion: 0,
       score: 0,
@@ -129,6 +131,8 @@ const QuizGame = () => {
           setTopic={(topic) => setQuiz(prev => ({ ...prev, topic }))}
           questionCount={quiz.questionCount}
           setQuestionCount={(questionCount) => setQuiz(prev => ({ ...prev, questionCount }))}
+          difficulty={quiz.difficulty}
+          setDifficulty={(difficulty) => setQuiz(prev => ({ ...prev, difficulty }))}
           onStart={handleStartQuiz}
         />
       );
