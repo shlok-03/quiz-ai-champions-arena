@@ -6,10 +6,13 @@ import SetupScreen from './quiz/SetupScreen';
 import LoadingScreen from './quiz/LoadingScreen';
 import PlayingScreen from './quiz/PlayingScreen';
 import TrophyDisplay from './TrophyDisplay';
+import Leaderboard from './Leaderboard';
 import { generateQuestions } from '@/services/QuizService';
+import { saveScore } from '@/services/LeaderboardService';
 import { QuizState } from '@/types/quiz';
 
 const QuizGame = () => {
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [quiz, setQuiz] = useState<QuizState>({
     topic: '',
     questionCount: 5,
@@ -25,6 +28,10 @@ const QuizGame = () => {
     showExplanationModal: false,
     currentExplanation: ''
   });
+
+  if (showLeaderboard) {
+    return <Leaderboard onBack={() => setShowLeaderboard(false)} />;
+  }
 
   const handleStartQuiz = async () => {
     if (!quiz.topic.trim() || !quiz.playerName.trim()) {
@@ -48,6 +55,19 @@ const QuizGame = () => {
       toast.error('Failed to generate questions. Please try again.');
       setQuiz(prev => ({ ...prev, gamePhase: 'setup' }));
     }
+  };
+
+  const handleFinish = (finalScore: number, finalCredits: number, finalLives: number) => {
+    saveScore({
+      player_name: quiz.playerName,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+      topic: quiz.topic,
+      difficulty: quiz.difficulty,
+      credits: finalCredits,
+    }).catch(() => {});
+
+    setQuiz(prev => ({ ...prev, score: finalScore, credits: finalCredits, lives: finalLives, gamePhase: 'finished' }));
   };
 
   const handleAnswer = (answerIndex: number) => {
@@ -88,9 +108,7 @@ const QuizGame = () => {
     }));
 
     if (newLives <= 0) {
-      setTimeout(() => {
-        setQuiz(prev => ({ ...prev, gamePhase: 'finished' }));
-      }, 1500);
+      setTimeout(() => handleFinish(newScore, newCredits, newLives), 1500);
       return;
     }
 
@@ -98,7 +116,7 @@ const QuizGame = () => {
       if (quiz.currentQuestion + 1 < quiz.questions.length) {
         setQuiz(prev => ({ ...prev, currentQuestion: prev.currentQuestion + 1 }));
       } else {
-        setQuiz(prev => ({ ...prev, gamePhase: 'finished' }));
+        handleFinish(newScore, newCredits, newLives);
       }
     }, 1500);
   };
@@ -134,6 +152,7 @@ const QuizGame = () => {
           difficulty={quiz.difficulty}
           setDifficulty={(difficulty) => setQuiz(prev => ({ ...prev, difficulty }))}
           onStart={handleStartQuiz}
+          onShowLeaderboard={() => setShowLeaderboard(true)}
         />
       );
     case 'loading':
@@ -173,6 +192,7 @@ const QuizGame = () => {
           topic={quiz.topic}
           isPerfectScore={isPerfectScore}
           onPlayAgain={resetQuiz}
+          onShowLeaderboard={() => setShowLeaderboard(true)}
           isGameOver={isGameOver}
           lives={quiz.lives}
         />

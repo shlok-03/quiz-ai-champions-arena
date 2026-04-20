@@ -10,6 +10,7 @@ interface TrophyDisplayProps {
   topic: string;
   isPerfectScore: boolean;
   onPlayAgain: () => void;
+  onShowLeaderboard: () => void;
   isGameOver?: boolean;
   lives: number;
 }
@@ -22,6 +23,7 @@ const TrophyDisplay: React.FC<TrophyDisplayProps> = ({
   topic,
   isPerfectScore,
   onPlayAgain,
+  onShowLeaderboard,
   isGameOver = false,
   lives = 0
 }) => {
@@ -137,15 +139,24 @@ const TrophyDisplay: React.FC<TrophyDisplayProps> = ({
           </div>
         )}
 
-        {/* Play again */}
-        <Button
-          onClick={onPlayAgain}
-          className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-xl glow-primary transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] animate-slide-in-bottom"
-          style={{ animationDelay: '0.6s' }}
-        >
-          <RotateCcw className="mr-2 h-5 w-5" />
-          Play Again
-        </Button>
+        {/* Buttons */}
+        <div className="space-y-3 animate-slide-in-bottom" style={{ animationDelay: '0.6s' }}>
+          <Button
+            onClick={onPlayAgain}
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base rounded-xl glow-primary transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <RotateCcw className="mr-2 h-5 w-5" />
+            Play Again
+          </Button>
+          <Button
+            onClick={onShowLeaderboard}
+            variant="outline"
+            className="w-full h-10 rounded-xl border-border/50 text-foreground hover:bg-primary/10 font-medium"
+          >
+            <Trophy className="mr-2 h-4 w-4 text-accent" />
+            View Leaderboard
+          </Button>
+        </div>
       </div>
     </div>
   );

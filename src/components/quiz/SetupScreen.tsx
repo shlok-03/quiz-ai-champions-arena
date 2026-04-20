@@ -15,6 +15,7 @@ interface SetupScreenProps {
   difficulty: Difficulty;
   setDifficulty: (d: Difficulty) => void;
   onStart: () => void;
+  onShowLeaderboard: () => void;
 }
 
 const difficultyConfig: Record<Difficulty, { label: string; color: string; icon: React.ReactNode; description: string }> = {
@@ -33,6 +34,7 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
   difficulty,
   setDifficulty,
   onStart,
+  onShowLeaderboard,
 }) => {
   return (
     <div className="min-h-screen bg-background bg-grid-pattern relative overflow-hidden flex items-center justify-center p-4">
@@ -146,6 +148,16 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
           >
             <Zap className="mr-2 h-5 w-5" />
             Generate Quiz
+          </Button>
+
+          {/* Leaderboard button */}
+          <Button
+            onClick={onShowLeaderboard}
+            variant="outline"
+            className="w-full h-10 rounded-xl border-border/50 text-foreground hover:bg-primary/10 font-medium"
+          >
+            <Trophy className="mr-2 h-4 w-4 text-accent" />
+            View Leaderboard
           </Button>
         </div>
       </div>
