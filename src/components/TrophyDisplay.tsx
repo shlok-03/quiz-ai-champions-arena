@@ -10,6 +10,7 @@ interface TrophyDisplayProps {
   topic: string;
   isPerfectScore: boolean;
   onPlayAgain: () => void;
+  onShowLeaderboard: () => void;
   isGameOver?: boolean;
   lives: number;
 }

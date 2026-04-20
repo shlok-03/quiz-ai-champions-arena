@@ -15,6 +15,7 @@ interface SetupScreenProps {
   difficulty: Difficulty;
   setDifficulty: (d: Difficulty) => void;
   onStart: () => void;
+  onShowLeaderboard: () => void;
 }
 
 const difficultyConfig: Record<Difficulty, { label: string; color: string; icon: React.ReactNode; description: string }> = {
