@@ -16,7 +16,7 @@ interface QuestionCardProps {
 
 const optionLabels = ['A', 'B', 'C', 'D'];
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber, onPrevious, onNext, hasPrevious, hasNext }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questionNumber, onPrevious, onNext, hasPrevious, hasNext, disabled = false }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
