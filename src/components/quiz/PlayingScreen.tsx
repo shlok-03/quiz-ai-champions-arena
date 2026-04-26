@@ -91,6 +91,10 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
               <p className="text-sm text-muted-foreground">Question {currentQuestion + 1} of {questions.length}</p>
             </div>
             <div className="flex items-center gap-4">
+              <div className={`flex items-center gap-1.5 bg-muted/50 rounded-lg px-3 py-1.5 ${timeLeft <= 5 ? 'animate-pulse' : ''}`}>
+                <Timer className={`h-4 w-4 ${timerColor}`} />
+                <span className={`text-sm font-semibold tabular-nums ${timerColor}`}>{timeLeft}s</span>
+              </div>
               <div className="flex items-center gap-1.5 bg-muted/50 rounded-lg px-3 py-1.5">
                 <Star className="h-4 w-4 text-warning" />
                 <span className="text-sm font-semibold text-foreground">{credits}</span>
