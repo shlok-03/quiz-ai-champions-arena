@@ -33,9 +33,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
       onAnswer(answerIndex);
     }, 1200);
   };
-      onAnswer(answerIndex);
-    }, 1200);
-  };
 
   const handleClearSelection = () => {
     if (showResult) return;
