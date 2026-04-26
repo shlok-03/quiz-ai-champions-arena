@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Star, Heart, Lightbulb } from 'lucide-react';
+import { Star, Heart, Lightbulb, Timer } from 'lucide-react';
 import QuestionCard from '../QuestionCard';
-import { Question } from '@/types/quiz';
+import { Question, Difficulty } from '@/types/quiz';
+
+const TIME_PER_DIFFICULTY: Record<Difficulty, number> = {
+  easy: 40,
+  medium: 30,
+  hard: 20,
+};
 
 interface PlayingScreenProps {
   topic: string;
@@ -12,6 +18,7 @@ interface PlayingScreenProps {
   credits: number;
   lives: number;
   score: number;
+  difficulty: Difficulty;
   showExplanationModal: boolean;
   currentExplanation: string;
   onAnswer: (answerIndex: number) => void;
@@ -27,6 +34,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   credits,
   lives,
   score,
+  difficulty,
   showExplanationModal,
   currentExplanation,
   onAnswer,
@@ -35,6 +43,38 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   onNext,
 }) => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const totalTime = TIME_PER_DIFFICULTY[difficulty];
+  const [timeLeft, setTimeLeft] = useState(totalTime);
+  const expiredRef = useRef(false);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    setTimeLeft(totalTime);
+    expiredRef.current = false;
+  }, [currentQuestion, totalTime]);
+
+  // Pause when explanation modal is open
+  useEffect(() => {
+    if (showExplanationModal) return;
+    if (timeLeft <= 0) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [showExplanationModal, currentQuestion]);
+
+  // Trigger timeout once
+  useEffect(() => {
+    if (timeLeft === 0 && !expiredRef.current && !showExplanationModal) {
+      expiredRef.current = true;
+      onAnswer(-1);
+    }
+  }, [timeLeft, showExplanationModal, onAnswer]);
+
+  const timerPct = (timeLeft / totalTime) * 100;
+  const timerColor =
+    timerPct > 50 ? 'text-success' : timerPct > 25 ? 'text-warning' : 'text-destructive';
+
 
   return (
     <div className="min-h-screen bg-background bg-grid-pattern relative overflow-hidden p-4">
@@ -51,6 +91,10 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
               <p className="text-sm text-muted-foreground">Question {currentQuestion + 1} of {questions.length}</p>
             </div>
             <div className="flex items-center gap-4">
+              <div className={`flex items-center gap-1.5 bg-muted/50 rounded-lg px-3 py-1.5 ${timeLeft <= 5 ? 'animate-pulse' : ''}`}>
+                <Timer className={`h-4 w-4 ${timerColor}`} />
+                <span className={`text-sm font-semibold tabular-nums ${timerColor}`}>{timeLeft}s</span>
+              </div>
               <div className="flex items-center gap-1.5 bg-muted/50 rounded-lg px-3 py-1.5">
                 <Star className="h-4 w-4 text-warning" />
                 <span className="text-sm font-semibold text-foreground">{credits}</span>
