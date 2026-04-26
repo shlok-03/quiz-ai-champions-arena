@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Star, Heart, Lightbulb } from 'lucide-react';
+import { Star, Heart, Lightbulb, Timer } from 'lucide-react';
 import QuestionCard from '../QuestionCard';
-import { Question } from '@/types/quiz';
+import { Question, Difficulty } from '@/types/quiz';
+
+const TIME_PER_DIFFICULTY: Record<Difficulty, number> = {
+  easy: 40,
+  medium: 30,
+  hard: 20,
+};
 
 interface PlayingScreenProps {
   topic: string;
