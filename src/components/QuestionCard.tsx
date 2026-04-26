@@ -26,10 +26,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
   }, [question.id]);
 
   const handleAnswerClick = (answerIndex: number) => {
-    if (showResult) return;
+    if (showResult || disabled) return;
     setSelectedAnswer(answerIndex);
     setShowResult(true);
     setTimeout(() => {
+      onAnswer(answerIndex);
+    }, 1200);
+  };
       onAnswer(answerIndex);
     }, 1200);
   };
