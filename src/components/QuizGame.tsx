@@ -171,6 +171,7 @@ const QuizGame = () => {
           credits={quiz.credits}
           lives={quiz.lives}
           score={quiz.score}
+          difficulty={quiz.difficulty}
           showExplanationModal={quiz.showExplanationModal}
           currentExplanation={quiz.currentExplanation}
           onAnswer={handleAnswer}
