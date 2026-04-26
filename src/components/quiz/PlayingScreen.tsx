@@ -134,6 +134,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
           onNext={onNext}
           hasPrevious={currentQuestion > 0}
           hasNext={currentQuestion < questions.length - 1}
+          disabled={timeLeft <= 0}
         />
 
         {/* Explanation Dialog */}
