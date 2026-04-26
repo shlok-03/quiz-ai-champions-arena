@@ -11,6 +11,7 @@ interface QuestionCardProps {
   onNext?: () => void;
   hasPrevious: boolean;
   hasNext: boolean;
+  disabled?: boolean;
 }
 
 const optionLabels = ['A', 'B', 'C', 'D'];
