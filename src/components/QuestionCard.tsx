@@ -80,9 +80,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, questio
         {question.options.map((option, index) => (
           <button
             key={index}
-            className={`w-full p-4 rounded-xl text-left transition-all duration-300 border flex items-center gap-3 ${getButtonStyle(index)} ${showResult ? '' : 'active:scale-[0.98]'}`}
+            className={`w-full p-4 rounded-xl text-left transition-all duration-300 border flex items-center gap-3 ${getButtonStyle(index)} ${showResult || disabled ? '' : 'active:scale-[0.98]'} ${disabled && !showResult ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={() => handleAnswerClick(index)}
-            disabled={showResult}
+            disabled={showResult || disabled}
           >
             <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${
               selectedAnswer === index && !showResult ? 'bg-primary text-primary-foreground' :
