@@ -18,6 +18,7 @@ interface PlayingScreenProps {
   credits: number;
   lives: number;
   score: number;
+  difficulty: Difficulty;
   showExplanationModal: boolean;
   currentExplanation: string;
   onAnswer: (answerIndex: number) => void;
@@ -33,6 +34,7 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   credits,
   lives,
   score,
+  difficulty,
   showExplanationModal,
   currentExplanation,
   onAnswer,
@@ -41,6 +43,38 @@ const PlayingScreen: React.FC<PlayingScreenProps> = ({
   onNext,
 }) => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
+  const totalTime = TIME_PER_DIFFICULTY[difficulty];
+  const [timeLeft, setTimeLeft] = useState(totalTime);
+  const expiredRef = useRef(false);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    setTimeLeft(totalTime);
+    expiredRef.current = false;
+  }, [currentQuestion, totalTime]);
+
+  // Pause when explanation modal is open
+  useEffect(() => {
+    if (showExplanationModal) return;
+    if (timeLeft <= 0) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [showExplanationModal, currentQuestion]);
+
+  // Trigger timeout once
+  useEffect(() => {
+    if (timeLeft === 0 && !expiredRef.current && !showExplanationModal) {
+      expiredRef.current = true;
+      onAnswer(-1);
+    }
+  }, [timeLeft, showExplanationModal, onAnswer]);
+
+  const timerPct = (timeLeft / totalTime) * 100;
+  const timerColor =
+    timerPct > 50 ? 'text-success' : timerPct > 25 ? 'text-warning' : 'text-destructive';
+
 
   return (
     <div className="min-h-screen bg-background bg-grid-pattern relative overflow-hidden p-4">
