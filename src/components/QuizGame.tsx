@@ -7,12 +7,13 @@ import LoadingScreen from './quiz/LoadingScreen';
 import PlayingScreen from './quiz/PlayingScreen';
 import TrophyDisplay from './TrophyDisplay';
 import Leaderboard from './Leaderboard';
-import { generateQuestions } from '@/services/QuizService';
+import { generateQuestions, saveQuizScore } from '@/services/QuizService';
 import { saveScore } from '@/services/LeaderboardService';
 import { QuizState } from '@/types/quiz';
 
 const QuizGame = () => {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<QuizState>({
     topic: '',
     questionCount: 5,
