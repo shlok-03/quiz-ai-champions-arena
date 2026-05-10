@@ -93,6 +93,7 @@ export type Database = {
           created_at: string
           difficulty: string
           id: string
+          player_name: string | null
           question_count: number
           topic: string
         }
@@ -100,6 +101,7 @@ export type Database = {
           created_at?: string
           difficulty?: string
           id?: string
+          player_name?: string | null
           question_count: number
           topic: string
         }
@@ -107,6 +109,7 @@ export type Database = {
           created_at?: string
           difficulty?: string
           id?: string
+          player_name?: string | null
           question_count?: number
           topic?: string
         }
