@@ -43,8 +43,9 @@ const QuizGame = () => {
     setQuiz(prev => ({ ...prev, gamePhase: 'loading' }));
     
     try {
-      const questions = await generateQuestions(quiz.topic, quiz.questionCount, quiz.difficulty);
-      
+      const { quizId, questions } = await generateQuestions(quiz.topic, quiz.questionCount, quiz.difficulty, quiz.playerName);
+      setCurrentQuizId(quizId);
+
       setQuiz(prev => ({
         ...prev,
         questions,
@@ -66,6 +67,17 @@ const QuizGame = () => {
       topic: quiz.topic,
       difficulty: quiz.difficulty,
       credits: finalCredits,
+    }).catch(() => {});
+
+    saveQuizScore({
+      quizId: currentQuizId,
+      playerName: quiz.playerName,
+      topic: quiz.topic,
+      difficulty: quiz.difficulty,
+      score: finalScore,
+      totalQuestions: quiz.questions.length,
+      credits: finalCredits,
+      livesRemaining: finalLives,
     }).catch(() => {});
 
     setQuiz(prev => ({ ...prev, score: finalScore, credits: finalCredits, lives: finalLives, gamePhase: 'finished' }));
