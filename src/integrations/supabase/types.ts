@@ -47,6 +47,118 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          correct_answer: number
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          question: string
+          question_index: number
+          quiz_id: string
+        }
+        Insert: {
+          correct_answer: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options: Json
+          question: string
+          question_index: number
+          quiz_id: string
+        }
+        Update: {
+          correct_answer?: number
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          question?: string
+          question_index?: number
+          quiz_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          difficulty: string
+          id: string
+          question_count: number
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question_count: number
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: string
+          id?: string
+          question_count?: number
+          topic?: string
+        }
+        Relationships: []
+      }
+      scores: {
+        Row: {
+          created_at: string
+          credits: number
+          difficulty: string
+          id: string
+          lives_remaining: number
+          player_name: string
+          quiz_id: string | null
+          score: number
+          topic: string
+          total_questions: number
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          difficulty?: string
+          id?: string
+          lives_remaining?: number
+          player_name: string
+          quiz_id?: string | null
+          score: number
+          topic: string
+          total_questions: number
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          difficulty?: string
+          id?: string
+          lives_remaining?: number
+          player_name?: string
+          quiz_id?: string | null
+          score?: number
+          topic?: string
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
