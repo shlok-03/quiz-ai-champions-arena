@@ -3,13 +3,14 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface GeneratedQuiz {
-  quizId: string;
+  quizId: string | null;
   questions: Question[];
 }
 
 async function persistQuiz(
   topic: string,
   difficulty: Difficulty,
+  playerName: string,
   questions: Question[],
 ): Promise<string | null> {
   try {
@@ -18,6 +19,7 @@ async function persistQuiz(
       .insert({
         topic,
         difficulty,
+        player_name: playerName,
         question_count: questions.length,
       })
       .select('id')
@@ -40,7 +42,6 @@ async function persistQuiz(
     const { error: questionsError } = await supabase.from('questions').insert(rows);
     if (questionsError) {
       console.error('Failed to save questions:', questionsError);
-      return quiz.id;
     }
 
     return quiz.id;
@@ -54,7 +55,8 @@ export async function generateQuestions(
   topic: string,
   questionCount: number,
   difficulty: Difficulty = 'medium',
-): Promise<Question[]> {
+  playerName = '',
+): Promise<GeneratedQuiz> {
   try {
     const { data, error } = await supabase.functions.invoke('generate-quiz', {
       body: { topic, questionCount, difficulty },
@@ -81,16 +83,59 @@ export async function generateQuestions(
       }
     }
 
-    // Persist the generated quiz + questions (non-blocking for the UX)
-    persistQuiz(topic, difficulty, questions).then((quizId) => {
-      if (quizId) console.log('Quiz saved with id:', quizId);
-    });
+    const quizId = await persistQuiz(topic, difficulty, playerName, questions);
 
     toast.success(`Generated ${questions.length} questions about ${topic}!`);
-    return questions;
+    return { quizId, questions };
   } catch (error) {
     console.error('Error generating questions:', error);
     toast.error(error instanceof Error ? error.message : 'Failed to generate questions');
     throw error;
   }
+}
+
+export interface SavedQuiz {
+  id: string;
+  topic: string;
+  difficulty: string;
+  question_count: number;
+  created_at: string;
+}
+
+export async function getQuizzesByPlayer(playerName: string): Promise<SavedQuiz[]> {
+  const { data, error } = await supabase
+    .from('quizzes')
+    .select('id, topic, difficulty, question_count, created_at')
+    .eq('player_name', playerName)
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('Failed to fetch quizzes:', error);
+    return [];
+  }
+  return (data ?? []) as SavedQuiz[];
+}
+
+export async function saveQuizScore(params: {
+  quizId: string | null;
+  playerName: string;
+  topic: string;
+  difficulty: Difficulty;
+  score: number;
+  totalQuestions: number;
+  credits: number;
+  livesRemaining: number;
+}) {
+  const { error } = await supabase.from('scores').insert({
+    quiz_id: params.quizId,
+    player_name: params.playerName,
+    topic: params.topic,
+    difficulty: params.difficulty,
+    score: params.score,
+    total_questions: params.totalQuestions,
+    credits: params.credits,
+    lives_remaining: params.livesRemaining,
+  });
+  if (error) console.error('Failed to save score:', error);
 }
