@@ -161,6 +161,8 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
             View Leaderboard
           </Button>
         </div>
+
+        <MyQuizzes playerName={playerName} />
       </div>
     </div>
   );
