@@ -7,12 +7,13 @@ import LoadingScreen from './quiz/LoadingScreen';
 import PlayingScreen from './quiz/PlayingScreen';
 import TrophyDisplay from './TrophyDisplay';
 import Leaderboard from './Leaderboard';
-import { generateQuestions } from '@/services/QuizService';
+import { generateQuestions, saveQuizScore } from '@/services/QuizService';
 import { saveScore } from '@/services/LeaderboardService';
 import { QuizState } from '@/types/quiz';
 
 const QuizGame = () => {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<QuizState>({
     topic: '',
     questionCount: 5,
@@ -42,8 +43,9 @@ const QuizGame = () => {
     setQuiz(prev => ({ ...prev, gamePhase: 'loading' }));
     
     try {
-      const questions = await generateQuestions(quiz.topic, quiz.questionCount, quiz.difficulty);
-      
+      const { quizId, questions } = await generateQuestions(quiz.topic, quiz.questionCount, quiz.difficulty, quiz.playerName);
+      setCurrentQuizId(quizId);
+
       setQuiz(prev => ({
         ...prev,
         questions,
@@ -65,6 +67,17 @@ const QuizGame = () => {
       topic: quiz.topic,
       difficulty: quiz.difficulty,
       credits: finalCredits,
+    }).catch(() => {});
+
+    saveQuizScore({
+      quizId: currentQuizId,
+      playerName: quiz.playerName,
+      topic: quiz.topic,
+      difficulty: quiz.difficulty,
+      score: finalScore,
+      totalQuestions: quiz.questions.length,
+      credits: finalCredits,
+      livesRemaining: finalLives,
     }).catch(() => {});
 
     setQuiz(prev => ({ ...prev, score: finalScore, credits: finalCredits, lives: finalLives, gamePhase: 'finished' }));

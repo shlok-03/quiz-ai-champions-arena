@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Brain, Zap, Heart, Sparkles, Target, Trophy } from 'lucide-react';
 import { Difficulty } from '@/types/quiz';
+import MyQuizzes from './MyQuizzes';
 
 interface SetupScreenProps {
   playerName: string;
@@ -160,6 +161,8 @@ const SetupScreen: React.FC<SetupScreenProps> = ({
             View Leaderboard
           </Button>
         </div>
+
+        <MyQuizzes playerName={playerName} />
       </div>
     </div>
   );
