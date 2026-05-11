@@ -105,7 +105,6 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
 ```
 
-> ⚠️ Never commit your `.env` file. Make sure it's in `.gitignore`.
 
 ### Supabase Setup
 
