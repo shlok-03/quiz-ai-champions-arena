@@ -14,6 +14,7 @@ async function persistQuiz(
   questions: Question[],
 ): Promise<string | null> {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
     const { data: quiz, error: quizError } = await supabase
       .from('quizzes')
       .insert({
@@ -21,6 +22,7 @@ async function persistQuiz(
         difficulty,
         player_name: playerName,
         question_count: questions.length,
+        user_id: user?.id ?? null,
       })
       .select('id')
       .single();
@@ -127,6 +129,7 @@ export async function saveQuizScore(params: {
   credits: number;
   livesRemaining: number;
 }) {
+  const { data: { user } } = await supabase.auth.getUser();
   const { error } = await supabase.from('scores').insert({
     quiz_id: params.quizId,
     player_name: params.playerName,
@@ -136,6 +139,7 @@ export async function saveQuizScore(params: {
     total_questions: params.totalQuestions,
     credits: params.credits,
     lives_remaining: params.livesRemaining,
+    user_id: user?.id ?? null,
   });
   if (error) console.error('Failed to save score:', error);
 }

@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           correct_answer: number
@@ -96,6 +120,7 @@ export type Database = {
           player_name: string | null
           question_count: number
           topic: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -104,6 +129,7 @@ export type Database = {
           player_name?: string | null
           question_count: number
           topic: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -112,6 +138,7 @@ export type Database = {
           player_name?: string | null
           question_count?: number
           topic?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -127,6 +154,7 @@ export type Database = {
           score: number
           topic: string
           total_questions: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -139,6 +167,7 @@ export type Database = {
           score: number
           topic: string
           total_questions: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -151,6 +180,7 @@ export type Database = {
           score?: number
           topic?: string
           total_questions?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -158,6 +188,20 @@ export type Database = {
             columns: ["quiz_id"]
             isOneToOne: false
             referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_quiz_id_quizzes_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_user_id_profiles_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
