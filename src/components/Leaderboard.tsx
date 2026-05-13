@@ -9,11 +9,11 @@ interface LeaderboardProps {
 }
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [entries, setEntries] = useState<QuizResultRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLeaderboard()
+    fetchQuizResults(100)
       .then(setEntries)
       .catch(() => setEntries([]))
       .finally(() => setLoading(false));
@@ -26,10 +26,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
     return <span className="text-muted-foreground text-sm font-mono w-5 text-center">{index + 1}</span>;
   };
 
-  const getDifficultyColor = (d: string) => {
-    if (d === 'easy') return 'text-green-400';
-    if (d === 'hard') return 'text-red-400';
-    return 'text-yellow-400';
+  const formatDate = (iso?: string) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   return (
