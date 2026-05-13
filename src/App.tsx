@@ -24,6 +24,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+            <Route path="/external-leaderboard" element={<ExternalLeaderboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
