@@ -8,6 +8,7 @@ import LoadingScreen from './quiz/LoadingScreen';
 import PlayingScreen from './quiz/PlayingScreen';
 import TrophyDisplay from './TrophyDisplay';
 import { generateQuestions, saveQuizScore } from '@/services/QuizService';
+import { insertQuizResult } from '@/integrations/external-supabase';
 import { QuizState } from '@/types/quiz';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from './ui/button';
@@ -76,6 +77,15 @@ const QuizGame = () => {
       credits: finalCredits,
       livesRemaining: finalLives,
     }).catch(() => {});
+
+    insertQuizResult({
+      player_name: quiz.playerName,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+      category: quiz.topic,
+    }).catch((err) => {
+      console.error('External quiz_results insert failed:', err);
+    });
 
     setQuiz(prev => ({ ...prev, score: finalScore, credits: finalCredits, lives: finalLives, gamePhase: 'finished' }));
   };

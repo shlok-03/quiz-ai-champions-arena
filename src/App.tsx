@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import LeaderboardPage from "./pages/Leaderboard";
+import ExternalLeaderboardPage from "./pages/ExternalLeaderboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./hooks/useAuth";
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+            <Route path="/external-leaderboard" element={<ExternalLeaderboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
