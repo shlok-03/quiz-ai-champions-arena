@@ -78,6 +78,15 @@ const QuizGame = () => {
       livesRemaining: finalLives,
     }).catch(() => {});
 
+    insertQuizResult({
+      player_name: quiz.playerName,
+      score: finalScore,
+      total_questions: quiz.questions.length,
+      category: quiz.topic,
+    }).catch((err) => {
+      console.error('External quiz_results insert failed:', err);
+    });
+
     setQuiz(prev => ({ ...prev, score: finalScore, credits: finalCredits, lives: finalLives, gamePhase: 'finished' }));
   };
 
