@@ -2,18 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trophy, ArrowLeft, Crown, Medal, Award } from 'lucide-react';
-import { getLeaderboard, LeaderboardEntry } from '@/services/LeaderboardService';
+import { fetchQuizResults, QuizResultRow } from '@/integrations/external-supabase';
 
 interface LeaderboardProps {
   onBack: () => void;
 }
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [entries, setEntries] = useState<QuizResultRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLeaderboard()
+    fetchQuizResults(100)
       .then(setEntries)
       .catch(() => setEntries([]))
       .finally(() => setLoading(false));
@@ -26,10 +26,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
     return <span className="text-muted-foreground text-sm font-mono w-5 text-center">{index + 1}</span>;
   };
 
-  const getDifficultyColor = (d: string) => {
-    if (d === 'easy') return 'text-green-400';
-    if (d === 'hard') return 'text-red-400';
-    return 'text-yellow-400';
+  const formatDate = (iso?: string) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   return (
@@ -54,10 +54,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
                 <TableRow className="border-border/50 hover:bg-transparent">
                   <TableHead className="w-12 text-muted-foreground">#</TableHead>
                   <TableHead className="text-muted-foreground">Player</TableHead>
-                  <TableHead className="text-muted-foreground">Topic</TableHead>
                   <TableHead className="text-center text-muted-foreground">Score</TableHead>
-                  <TableHead className="text-center text-muted-foreground">Difficulty</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Credits</TableHead>
+                  <TableHead className="text-muted-foreground">Category</TableHead>
+                  <TableHead className="text-right text-muted-foreground">Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -65,14 +64,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onBack }) => {
                   <TableRow key={entry.id} className="border-border/30 hover:bg-primary/5">
                     <TableCell className="py-3">{getRankIcon(i)}</TableCell>
                     <TableCell className="font-semibold text-foreground">{entry.player_name}</TableCell>
-                    <TableCell className="text-primary">{entry.topic}</TableCell>
                     <TableCell className="text-center font-bold text-foreground">
                       {entry.score}/{entry.total_questions}
                     </TableCell>
-                    <TableCell className={`text-center capitalize font-medium ${getDifficultyColor(entry.difficulty)}`}>
-                      {entry.difficulty}
-                    </TableCell>
-                    <TableCell className="text-right text-warning font-semibold">{entry.credits}</TableCell>
+                    <TableCell className="text-primary">{entry.category}</TableCell>
+                    <TableCell className="text-right text-muted-foreground">{formatDate(entry.created_at)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
