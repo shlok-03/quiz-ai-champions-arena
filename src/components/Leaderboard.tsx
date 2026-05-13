@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Trophy, ArrowLeft, Crown, Medal, Award } from 'lucide-react';
-import { getLeaderboard, LeaderboardEntry } from '@/services/LeaderboardService';
+import { fetchQuizResults, QuizResultRow } from '@/integrations/external-supabase';
 
 interface LeaderboardProps {
   onBack: () => void;
