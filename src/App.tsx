@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import LeaderboardPage from "./pages/Leaderboard";
+import ExternalLeaderboardPage from "./pages/ExternalLeaderboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./hooks/useAuth";
 
