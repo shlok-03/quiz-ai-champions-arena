@@ -1,19 +1,39 @@
-# 🧠 Quiz AI Champions Arena
+# 🏆 Quiz AI Champions Arena
 
-An AI-powered quiz generator that creates custom multiple-choice questions on any topic, with live scoring, difficulty levels, and a player leaderboard.
+A full-stack AI-powered quiz web application built with React, Lovable Cloud, and Supabase. Players can generate custom quizzes on any topic using AI, compete for high scores, and view a live leaderboard backed by an external Supabase database.
 
-🔗 **Live App:** [quiz-ai-champions-arena.lovable.app](https://quiz-ai-champions-arena.lovable.app)
+---
+
+## 🚀 Live Demo
+
+[https://quiz-ai-champions-arena.lovable.app](https://quiz-ai-champions-arena.lovable.app)
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Database](#database)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [CRUD Operations](#crud-operations)
+- [RLS Policies](#rls-policies)
+- [Project Structure](#project-structure)
+- [Author](#author)
 
 ---
 
 ## ✨ Features
 
-- 🤖 **AI-Generated Questions** — Enter any topic and get unique questions every time
-- 🎯 **3 Difficulty Levels** — Easy, Medium, and Hard with adaptive question depth
-- 🏆 **Leaderboard** — Track top scores across players
-- 📊 **Score History** — View past quiz attempts by player name
-- 💡 **Explanations** — Every answer includes an AI-generated explanation
-- 🔒 **Secure Backend** — AI calls handled server-side via Supabase Edge Functions
+- 🤖 **AI-Generated Questions** — Enter any topic and difficulty, and the app generates quiz questions in real time using Claude AI
+- 🎮 **Lives System** — Players have 3 lives; wrong answers cost a life
+- 💰 **Credits System** — Earn +10 credits per correct answer
+- 🏅 **Leaderboard** — Live leaderboard showing top scores from all players, powered by Supabase
+- ✏️ **Full CRUD** — Create, read, update, and delete quiz results directly from the leaderboard
+- 🔐 **Authentication** — User sign-up and login via Lovable Cloud Auth
+- 📱 **Responsive Design** — Works on desktop and mobile
 
 ---
 
@@ -21,104 +41,158 @@ An AI-powered quiz generator that creates custom multiple-choice questions on an
 
 | Layer | Technology |
 |---|---|
-| Frontend | React + TypeScript + Vite |
+| Frontend | React + TypeScript |
 | Styling | Tailwind CSS + shadcn/ui |
-| Backend | Supabase (Database + Edge Functions) |
-| AI | Google Gemini via Lovable AI Gateway |
-| Hosting | Lovable |
+| Routing | React Router |
+| Backend / Auth | Lovable Cloud (Supabase-powered) |
+| External Database | Supabase (PostgreSQL) |
+| AI | Claude AI (Anthropic) via Lovable |
+| Hosting | Lovable Cloud |
 
 ---
 
-## 🗄 Database Schema
+## 🏗 Architecture
+
+```
+┌─────────────────────────────────────────┐
+│             React Frontend               │
+│         (Lovable Cloud hosted)           │
+├──────────────────┬──────────────────────┤
+│  Lovable Cloud   │   External Supabase  │
+│  (Auth, Quizzes, │   (quiz_results      │
+│   Questions,     │    table — CRUD)     │
+│   Scores)        │                      │
+└──────────────────┴──────────────────────┘
+```
+
+The app uses **two Supabase backends**:
+- **Lovable Cloud** — handles authentication, quiz generation metadata, internal scores, and questions
+- **External Supabase** — dedicated `quiz_results` table demonstrating full CRUD with RLS policies
+
+---
+
+## 🗄 Database
+
+### External Supabase — `quiz_results` Table
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | UUID | Primary key, auto-generated |
+| `player_name` | TEXT | Name of the player |
+| `score` | INTEGER | Number of correct answers |
+| `total_questions` | INTEGER | Total questions in the quiz |
+| `category` | TEXT | Topic of the quiz |
+| `created_at` | TIMESTAMP | Auto-generated timestamp |
+
+### Schema
 
 ```sql
--- Stores each quiz session
-quizzes (
-  id uuid PRIMARY KEY,
-  topic text,
-  difficulty text,
-  player_name text,
-  question_count integer,
-  created_at timestamptz
-)
-
--- Stores individual questions per quiz
-questions (
-  id uuid PRIMARY KEY,
-  quiz_id uuid REFERENCES quizzes(id),
-  question_index integer,
-  question text,
-  options jsonb,
-  correct_answer text,
-  explanation text
-)
-
--- Stores final scores
-scores (
-  id uuid PRIMARY KEY,
-  quiz_id uuid REFERENCES quizzes(id),
-  player_name text,
-  topic text,
-  difficulty text,
-  score integer,
-  total_questions integer,
-  credits integer,
-  lives_remaining integer,
-  created_at timestamptz
-)
+CREATE TABLE quiz_results (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  player_name TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  total_questions INTEGER,
+  category TEXT,
+  created_at TIMESTAMP DEFAULT now()
+);
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚦 Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- A [Supabase](https://supabase.com) account
-- A [Lovable](https://lovable.dev) account
+- npm or yarn
+- A Supabase account
 
-### Local Development
+### Installation
 
 ```bash
-# Clone the repo
-git clone https://github.com/shlok-03/quiz-ai-champions-arena.git
+# Clone the repository
+git clone https://github.com/your-username/quiz-ai-champions-arena.git
+
+# Navigate into the project
 cd quiz-ai-champions-arena
 
 # Install dependencies
 npm install
 
-# Set up environment variables
-cp .env.example .env
-# Fill in your Supabase URL and anon key
-
-# Start the dev server
+# Start the development server
 npm run dev
 ```
 
-### Environment Variables
+---
 
-Create a `.env` file at the root with:
+## 🔑 Environment Variables
+
+Create a `.env.local` file in the root directory:
 
 ```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+> The external Supabase client is configured in `src/integrations/external-supabase.ts`.
 
-### Supabase Setup
+---
 
-1. Create a new Supabase project
-2. Run the migration files in `supabase/migrations/` via the SQL Editor
-3. Deploy the edge function:
+## ⚙️ CRUD Operations
 
-```bash
-supabase login
-supabase link --project-ref your-project-ref
-supabase functions deploy generate-quiz
+All four CRUD operations are implemented via the external Supabase client in `src/integrations/external-supabase.ts`.
+
+### Create
+A quiz result is automatically inserted into `quiz_results` when a player finishes a quiz. A manual entry form is also available on the Leaderboard page.
+
+```ts
+await insertQuizResult({ player_name, score, total_questions, category });
 ```
 
-4. Add the `LOVABLE_API_KEY` secret in **Supabase → Edge Functions → Secrets**
+### Read
+The leaderboard fetches all results from Supabase, sorted by score descending.
+
+```ts
+const results = await fetchQuizResults();
+```
+
+### Update
+Each row on the leaderboard has an Edit button that opens inline editing for `player_name`, `score`, and `category`.
+
+```ts
+await updateQuizResult(id, { player_name, score, category });
+```
+
+### Delete
+Each row has a Delete button with a confirmation dialog before removal.
+
+```ts
+await deleteQuizResult(id);
+```
+
+---
+
+## 🔒 RLS Policies
+
+Row Level Security is enabled on the `quiz_results` table. The following policies allow both anonymous and authenticated users to perform all operations:
+
+```sql
+-- SELECT
+CREATE POLICY "Allow all select" ON quiz_results
+FOR SELECT TO anon, authenticated USING (true);
+
+-- INSERT
+CREATE POLICY "Allow all insert" ON quiz_results
+FOR INSERT TO anon, authenticated WITH CHECK (true);
+
+-- UPDATE
+CREATE POLICY "Allow anon update" ON quiz_results
+FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+-- DELETE
+CREATE POLICY "Allow anon delete" ON quiz_results
+FOR DELETE TO anon, authenticated USING (true);
+```
 
 ---
 
@@ -126,48 +200,38 @@ supabase functions deploy generate-quiz
 
 ```
 src/
-├── components/        # Reusable UI components
-├── hooks/             # Custom React hooks
+├── components/
+│   ├── quiz/
+│   │   ├── SetupScreen.tsx       # Quiz configuration screen
+│   │   ├── PlayingScreen.tsx     # Active quiz gameplay
+│   │   └── LoadingScreen.tsx     # AI generation loading state
+│   ├── Leaderboard.tsx           # Full CRUD leaderboard
+│   ├── QuizGame.tsx              # Main quiz controller
+│   └── TrophyDisplay.tsx        # Results screen
 ├── integrations/
-│   └── supabase/      # Supabase client + generated types
-├── pages/             # Route-level page components
-├── types/             # TypeScript type definitions
-└── utils/             # Helper functions (quiz generation, scoring)
-
-supabase/
-├── functions/
-│   └── generate-quiz/ # Edge function — AI question generation
-└── migrations/        # Database schema migrations
+│   ├── supabase/
+│   │   └── client.ts             # Lovable Cloud client
+│   └── external-supabase.ts     # External Supabase client (CRUD)
+├── services/
+│   ├── QuizService.ts            # AI question generation
+│   └── LeaderboardService.ts    # Lovable Cloud leaderboard
+├── hooks/
+│   └── useAuth.ts                # Authentication hook
+└── types/
+    └── quiz.ts                   # TypeScript interfaces
 ```
-
----
-
-## 🎮 How It Works
-
-1. Player enters their name, a topic, question count, and difficulty
-2. The app calls the `generate-quiz` Supabase Edge Function
-3. The edge function sends a structured prompt to the AI model
-4. Questions are returned with 4 options, a correct answer, and an explanation
-5. Quiz data is saved to Supabase (`quizzes` + `questions` tables)
-6. Player answers questions and receives a final score
-7. Score is saved to the `scores` table and shown on the leaderboard
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome! For major changes, open an issue first to discuss what you'd like to change.
-
----
-
-## 📄 License
-
-MIT License — feel free to use and modify for your own projects.
 
 ---
 
 ## 👤 Author
 
 **Shlok Gor**
-- GitHub: [@shlok-03](https://github.com/shlok-03)
+- Email: shlok3330@gmail.com
 - LinkedIn: [linkedin.com/in/shlok-gor-a82717270](https://linkedin.com/in/shlok-gor-a82717270)
+- Montreal, QC
+
+---
+
+## 📄 License
+
+This project was built as part of the AEC Internet Programming program at TAV College, Montreal.
