@@ -34,35 +34,42 @@ const LeaderboardPage = () => {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
+      const { data: scores, error } = await supabase
         .from('scores')
-        .select(`
-          id, score, total_questions, credits, difficulty, created_at,
-          quizzes ( topic ),
-          profiles ( email, display_name )
-        `)
+        .select('id, score, total_questions, credits, difficulty, created_at, topic, quiz_id, user_id, player_name')
         .order('score', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(100);
 
-      if (error) {
+      if (error || !scores) {
         console.error(error);
         setRows([]);
-      } else {
-        setRows(
-          (data ?? []).map((r: any) => ({
+        setLoading(false);
+        return;
+      }
+
+      const userIds = Array.from(new Set(scores.map((s: any) => s.user_id).filter(Boolean)));
+      const { data: profiles } = userIds.length
+        ? await supabase.from('profiles').select('id, email, display_name').in('id', userIds)
+        : { data: [] as any[] };
+      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+
+      setRows(
+        scores.map((r: any) => {
+          const p = profileMap.get(r.user_id);
+          return {
             id: r.id,
             score: r.score,
             total_questions: r.total_questions,
             credits: r.credits,
             difficulty: r.difficulty,
             created_at: r.created_at,
-            topic: r.quizzes?.topic ?? '—',
-            email: r.profiles?.email ?? null,
-            display_name: r.profiles?.display_name ?? null,
-          }))
-        );
-      }
+            topic: r.topic ?? '—',
+            email: p?.email ?? null,
+            display_name: p?.display_name ?? r.player_name ?? null,
+          };
+        })
+      );
       setLoading(false);
     })();
   }, []);
