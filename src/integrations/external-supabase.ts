@@ -44,3 +44,22 @@ export async function fetchQuizResults(limit = 100): Promise<QuizResultRow[]> {
   }
   return (data ?? []) as QuizResultRow[];
 }
+
+export async function updateQuizResult(
+  id: string,
+  updates: Partial<Pick<QuizResultRow, 'player_name' | 'score' | 'category'>>
+) {
+  const { error } = await externalSupabase.from('quiz_results').update(updates).eq('id', id);
+  if (error) {
+    console.error('Failed to update quiz_results:', error);
+    throw error;
+  }
+}
+
+export async function deleteQuizResult(id: string) {
+  const { error } = await externalSupabase.from('quiz_results').delete().eq('id', id);
+  if (error) {
+    console.error('Failed to delete quiz_results:', error);
+    throw error;
+  }
+}
