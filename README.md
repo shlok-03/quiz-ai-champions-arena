@@ -6,7 +6,7 @@ A full-stack AI-powered quiz web application built with React, Lovable Cloud, an
 
 ## 🚀 Live Demo
 
-[https://quiz-ai-champions-arena.lovable.app](https://quiz-ai-champions-arena.lovable.app)
+https://quiz-ai-champions-arena.vercel.app
 
 ---
 
@@ -111,7 +111,7 @@ CREATE TABLE quiz_results (
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/quiz-ai-champions-arena.git
+git clone https://github.com/shlok-03/quiz-ai-champions-arena.git
 
 # Navigate into the project
 cd quiz-ai-champions-arena
@@ -130,8 +130,8 @@ npm run dev
 Create a `.env.local` file in the root directory:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
 
 > The external Supabase client is configured in `src/integrations/external-supabase.ts`.
